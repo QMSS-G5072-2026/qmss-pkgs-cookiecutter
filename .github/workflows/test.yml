@@ -1,36 +1,34 @@
 name: test
 
 on:
-  # Trigger the workflow on push or pull request on main branch
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
   schedule:
-    # Run cron job every month, https://crontab.guru/every-month
+    # Run monthly so we notice when upstream tools change
     - cron: "0 0 1 * *"
 
 jobs:
-  # This job tests that the CC works
-  test-cc:
+  test-template:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.9", "3.10"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v2
-      # Setup
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencie
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
+
+      - name: Test that the template renders for every option
+        run: uv run --no-project --python 3.13 --with cookiecutter --with pytest pytest tests/
+
+      - name: Generated package installs, tests, documents, and builds
+        shell: bash
         run: |
-          pip install -r requirements.txt
-      # Run tests
-      - name: Pytest tests
-        run: |
-          pytest tests/
+          uvx cookiecutter . --no-input --output-dir "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/mypkg"
+          uv sync
+          uv run pytest
+          uv run sphinx-build -b html docs docs/_build/html
+          uv build

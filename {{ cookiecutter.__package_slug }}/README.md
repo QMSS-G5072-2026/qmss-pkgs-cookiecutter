@@ -5,7 +5,18 @@
 ## Installation
 
 ```bash
-$ pip install {{ cookiecutter.__package_slug }}
+$ uv add {{ cookiecutter.__package_slug }}
+```
+
+or, without uv, `pip install {{ cookiecutter.__package_slug }}`.
+
+## Development
+
+```bash
+$ uv sync                       # create .venv and install the package with its dev and docs groups
+$ uv run pytest                 # run the tests
+$ uv run make html -C docs      # build the documentation
+$ uv build                      # build the sdist and wheel into dist/
 ```
 
 ## Usage
@@ -22,4 +33,4 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## Credits
 
-`{{ cookiecutter.__package_slug }}` was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) and the `py-pkgs-cookiecutter` [template](https://github.com/py-pkgs/py-pkgs-cookiecutter).
+`{{ cookiecutter.__package_slug }}` was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) and the `qmss-pkgs-cookiecutter` [template](https://github.com/QMSS-G5072-2026/qmss-pkgs-cookiecutter), a uv-based fork of [`py-pkgs-cookiecutter`](https://github.com/py-pkgs/py-pkgs-cookiecutter).

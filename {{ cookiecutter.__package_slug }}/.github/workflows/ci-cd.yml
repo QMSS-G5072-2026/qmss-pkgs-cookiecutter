@@ -1,95 +1,81 @@
 name: ci-cd
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    # Pushing a version tag (e.g. v0.1.1) also publishes a release
+    tags: ["v*"]
+  pull_request:
 
 jobs:
   ci:
-    # Set up operating system
     runs-on: ubuntu-latest
-
-    # Define job steps
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
         with:
-          python-version: "{{ cookiecutter.python_version }}"
+          enable-cache: true
 
-      - name: Check-out repository
-        uses: actions/checkout@v3
-
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install package
-        run: poetry install
+      - name: Install the project
+        run: uv sync --locked
 
       - name: Test with pytest
-        run: poetry run pytest tests/ --cov={{ cookiecutter.__package_slug }} --cov-report=xml
-
-      - name: Use Codecov to track coverage
-        uses: codecov/codecov-action@v5
-        with:
-          token: {% raw %}${{ secrets.CODECOV_TOKEN }}{% endraw %}
-          files: ./coverage.xml   # coverage report
+        run: uv run pytest --cov={{ cookiecutter.__package_slug }} --cov-report=term-missing
 
       - name: Build documentation
-        run: poetry run make html --directory docs/
+        run: uv run make html --directory docs/
 
-  cd:
-    permissions:
-      id-token: write
-      contents: write
-    
-    # Only run this job if the "ci" job passes
+  build:
     needs: ci
-
-    # Only run this job if new work is pushed to "main"
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    # Set up operating system
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-
-    # Define job steps
+    permissions:
+      contents: read
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Check out repository
+        uses: actions/checkout@v7
         with:
-          python-version: "{{ cookiecutter.python_version }}"
+          persist-credentials: false
 
-      - name: Check-out repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
 
-      - name: Use Python Semantic Release to prepare release
-        id: release
-        uses: python-semantic-release/python-semantic-release@v8.3.0
+      - name: Build distributions
+        run: uv build
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v7
         with:
-          github_token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    # The environment name must match the Trusted Publisher you set up on TestPyPI
+    environment:
+      name: testpypi
+    permissions:
+      # Required for Trusted Publishing: no API token is stored in the repository
+      id-token: write
+    steps:
+      # `uv publish --index testpypi` reads the index from pyproject.toml
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
+
+      - name: Download distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
 
       - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.release.outputs.released == 'true'
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          password: {% raw %}${{ secrets.TEST_PYPI_API_TOKEN }}{% endraw %}
-
-      - name: Test install from TestPyPI
-        if: steps.release.outputs.released == 'true'
-        run: |
-            pip install \
-            --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple \
-            {{ cookiecutter.__package_slug }}
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.release.outputs.released == 'true'
-        with:
-          password: {% raw %}${{ secrets.PYPI_API_TOKEN }}{% endraw %}
-
-      - name: Publish package distributions to GitHub Releases
-        uses: python-semantic-release/upload-to-gh-release@main
-        if: steps.release.outputs.released == 'true'
-        with:
-          github_token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+        run: uv publish --index testpypi

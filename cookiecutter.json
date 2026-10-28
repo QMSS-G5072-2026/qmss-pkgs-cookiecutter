@@ -1,10 +1,11 @@
 {
   "author_name": "Monty Python",
+  "author_email": "monty@example.com",
   "package_name": "mypkg",
   "__package_slug": "{{ cookiecutter.package_name|lower|replace(' ', '_')|replace('-', '_') }}",
   "package_short_description": "A package for doing great things!",
   "package_version": "0.1.0",
-  "python_version": "3.12",
+  "python_version": "3.13",
   "open_source_license": [
     "MIT",
     "Apache License 2.0",
@@ -14,9 +15,10 @@
     "Proprietary",
     "None"
   ],
+  "__license_spdx": "{{ {'MIT': 'MIT', 'Apache License 2.0': 'Apache-2.0', 'GNU General Public License v3.0': 'GPL-3.0-or-later', 'CC0 v1.0 Universal': 'CC0-1.0', 'BSD 3-Clause': 'BSD-3-Clause', 'Proprietary': 'LicenseRef-Proprietary', 'None': ''}[cookiecutter.open_source_license] }}",
   "include_github_actions": [
-    "no",
     "ci",
-    "ci+cd"
+    "ci+cd",
+    "no"
   ]
 }

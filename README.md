@@ -1,76 +1,62 @@
-# Py-Pkgs-Cookiecutter: A cookiecutter template for Python packages
+# qmss-pkgs-cookiecutter
 
-[![Documentation Status](https://readthedocs.org/projects/py-pkgs-cookiecutter/badge/?version=latest)](https://py-pkgs-cookiecutter.readthedocs.io/en/latest/)
-![tests](https://github.com/py-pkgs/py-pkgs-cookiecutter/workflows/test/badge.svg)
-[![release](https://img.shields.io/github/release/py-pkgs/py-pkgs-cookiecutter.svg)](https://github.com/py-pkgs/py-pkgs-cookiecutter/releases)
-[![python](https://img.shields.io/badge/python-%5E3.8-blue)]()
-[![os](https://img.shields.io/badge/OS-Ubuntu%2C%20Mac%2C%20Windows-purple)]()
+A [Cookiecutter](https://cookiecutter.readthedocs.io/) template for creating a Python package managed with [uv](https://docs.astral.sh/uv/), used in QMSS G5072 *Modern Data Structures* at Columbia University.
 
-<p align="center">
-  <img src="docs/source/_static/hex.png" width="220" alt="The Py-Pkgs-Cookiecutter logo.">
-</p>
-
-<br>
-
-`py-pkgs-cookiecutter` is a [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) template for creating a fully-featured Python package using [`poetry`](https://python-poetry.org). It supplements the [Python Packages book](https://py-pkgs.org) by Tomas Beuzen and Tiffany Timbers but can be used independently.
+It is a fork of [`py-pkgs-cookiecutter`](https://github.com/py-pkgs/py-pkgs-cookiecutter) by Tomas Beuzen and Tiffany Timbers, the template that accompanies the [*Python Packages*](https://py-pkgs.org) book. The project layout is the same; Poetry has been replaced with uv throughout.
 
 ## Usage
 
-Please see the [documentation](https://py-pkgs-cookiecutter.readthedocs.io/en/latest/) for more detail on using `py-pkgs-cookiecutter`. We provide the fundamental steps below:
+With [uv installed](https://docs.astral.sh/uv/getting-started/installation/), run:
 
-1. Install [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/):
+```bash
+uvx cookiecutter gh:QMSS-G5072-2026/qmss-pkgs-cookiecutter
+```
 
-    ```bash
-    pip install cookiecutter
-    ```
+`uvx` runs Cookiecutter in a temporary environment, so nothing needs to be installed first. Answer the prompts, then:
 
-2. Generate a Python package structure using [`py-pkgs-cookiecutter`](https://github.com/py-pkgs/py-pkgs-cookiecutter):
+```bash
+cd mypkg
+uv sync          # creates .venv, installs your package and its dev/docs groups, writes uv.lock
+uv run pytest    # runs the (empty) test suite
+```
 
-    ```bash
-    cookiecutter https://github.com/py-pkgs/py-pkgs-cookiecutter.git
-    ```
+## What you get
 
-3. After responding to the prompts you should have a directory structure similar to that shown below. To learn more about the contents of this directory structure, please see the `py-pkgs-cookiecutter` [documentation](https://py-pkgs-cookiecutter.readthedocs.io/en/latest/).
+```
+mypkg
+├── .github/workflows        ← GitHub Actions: tests and docs on every push (optional: publish on tags)
+├── .readthedocs.yml         ← Read the Docs configuration (installs with uv)
+├── .python-version          ← Python version uv uses for development
+├── CHANGELOG.md
+├── CONDUCT.md
+├── CONTRIBUTING.md
+├── docs                     ← Sphinx documentation (MyST Markdown + notebooks, AutoAPI)
+├── LICENSE
+├── pyproject.toml           ← project metadata, dependency groups, uv_build backend
+├── README.md
+├── src
+│   └── mypkg
+│       ├── __init__.py
+│       └── mypkg.py
+└── tests
+    └── test_mypkg.py
+```
 
-    ```text
-    pkg
-    ├── .github                    ┐
-    │   └── workflows              │ GitHub Actions workflow
-    │       └── ci-cd.yml          ┘
-    ├── .gitignore                 ┐
-    ├── .readthedocs.yml           │
-    ├── CHANGELOG.md               │
-    ├── CONDUCT.md                 │
-    ├── CONTRIBUTING.md            │
-    ├── docs                       │
-    │   ├── make.bat               │
-    │   ├── Makefile               │
-    │   ├── requirements.txt       │
-    │   ├── changelog.md           │
-    │   ├── conduct.md             │
-    │   ├── conf.py                │ Package documentation
-    │   ├── contributing.md        │
-    │   ├── index.md               │
-    │   └── usage.ipynb            │
-    ├── LICENSE                    │
-    ├── README.md                  ┘
-    ├── pyproject.toml             ┐ 
-    ├── src                        │
-    │   └── pkg                    │ Package source code, metadata,
-    │       ├── __init__.py        │ and build instructions 
-    │       └── pkg.py             ┘
-    └── tests                      ┐
-        └── test_pkg.py            ┘ Package tests
-    ```
+## Prompts
 
-## Contributing
+| Prompt | Default | Notes |
+|---|---|---|
+| `author_name` | Monty Python | |
+| `author_email` | monty@example.com | |
+| `package_name` | mypkg | Lowercased; spaces and dashes become underscores |
+| `package_short_description` | A package for doing great things! | |
+| `package_version` | 0.1.0 | |
+| `python_version` | 3.13 | Minimum supported Python (`requires-python`) |
+| `open_source_license` | MIT | Written to `pyproject.toml` as an SPDX expression |
+| `include_github_actions` | ci | `ci`: tests + docs; `ci+cd`: also publishes to TestPyPI when you push a `v*` tag; `no` |
 
-Interested in contributing? Check out the [Contributing Guidelines](https://py-pkgs-cookiecutter.readthedocs.io/en/latest/contributing.html). Please note that this project is released with a [Code of Conduct](https://py-pkgs-cookiecutter.readthedocs.io/en/latest/conduct.html). By contributing to this project, you agree to abide by its terms.
+## Testing the template
 
-## License
-
-`py-pkgs-cookiecutter` was created by Tomas Beuzen and Tiffany Timbers. It is licensed under the terms of the BSD license.
-
-## Acknowledgements
-
-`py-pkgs-cookiecutter` was originally developed for use in the University of British Columbia's (UBC) `Master of Data Science`_ program (MDS). It was inspired by the pyOpenSci `cookiecutter` [template](https://github.com/pyOpenSci/cookiecutter-pyopensci).
+```bash
+uv run --no-project --with cookiecutter --with pytest pytest tests/
+```

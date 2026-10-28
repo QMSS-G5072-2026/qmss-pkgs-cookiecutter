@@ -44,28 +44,21 @@ Ready to contribute? Here's how to set up `{{ cookiecutter.__package_slug }}` fo
 
 1. Download a copy of `{{ cookiecutter.__package_slug }}` locally.
 
-2. Create and activate a conda environment for `{{ cookiecutter.__package_slug }}`:
+2. Install [`uv`](https://docs.astral.sh/uv/), then create the environment and install `{{ cookiecutter.__package_slug }}` with its development dependencies:
 
     ```console
-    $ conda create -n {{ cookiecutter.__package_slug }} python={{ cookiecutter.python_version }}
-    $ conda activate {{ cookiecutter.__package_slug }}
+    $ uv sync
     ```
 
-3. Install `{{ cookiecutter.__package_slug }}` using `poetry`:
-
-    ```console
-    $ poetry install
-    ```
-
-4. Use `git` (or similar) to create a branch for local development and make your changes:
+3. Use `git` (or similar) to create a branch for local development and make your changes:
 
     ```console
     $ git checkout -b name-of-your-bugfix-or-feature
     ```
 
-5. When you're done making changes, check that your changes conform to any code formatting requirements and pass any tests.
+4. When you're done making changes, check that your changes conform to any code formatting requirements and pass the tests (`uv run pytest`).
 
-6. Commit your changes and open a pull request.
+5. Commit your changes and open a pull request.
 
 ## Pull Request Guidelines
 
